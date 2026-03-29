@@ -432,12 +432,14 @@ async def start_confession_flow(update: Update, context: ContextTypes.DEFAULT_TY
 async def choose_categories_flow(update: Update, context: ContextTypes.DEFAULT_TYPE, direct_call=False):
     """Show category selection"""
     keyboard = []
-    # Create two-column layout for categories
-    for i in range(0, len(CATEGORIES), 2):
+    # Create three-column layout for categories
+    for i in range(0, len(CATEGORIES), 3):
         row = []
         row.append(InlineKeyboardButton(CATEGORIES[i], callback_data=f"category_{i}"))
         if i + 1 < len(CATEGORIES):
             row.append(InlineKeyboardButton(CATEGORIES[i + 1], callback_data=f"category_{i + 1}"))
+        if i + 2 < len(CATEGORIES):
+            row.append(InlineKeyboardButton(CATEGORIES[i + 2], callback_data=f"category_{i + 2}"))
         keyboard.append(row)
     
     keyboard.append([InlineKeyboardButton("✅ Done Selecting", callback_data="categories_done")])
@@ -604,16 +606,19 @@ async def category_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['selected_categories'] = selected_categories
     
-    # Update the keyboard to show selected categories in two columns
+    # Update the keyboard to show selected categories in three columns
     keyboard = []
-    # Create two-column layout for categories with selection indicators
-    for i in range(0, len(CATEGORIES), 2):
+    # Create three-column layout for categories with selection indicators
+    for i in range(0, len(CATEGORIES), 3):
         row = []
         prefix1 = "✅ " if CATEGORIES[i] in selected_categories else ""
         row.append(InlineKeyboardButton(f"{prefix1}{CATEGORIES[i]}", callback_data=f"category_{i}"))
         if i + 1 < len(CATEGORIES):
             prefix2 = "✅ " if CATEGORIES[i + 1] in selected_categories else ""
             row.append(InlineKeyboardButton(f"{prefix2}{CATEGORIES[i + 1]}", callback_data=f"category_{i + 1}"))
+        if i + 2 < len(CATEGORIES):
+            prefix3 = "✅ " if CATEGORIES[i + 2] in selected_categories else ""
+            row.append(InlineKeyboardButton(f"{prefix3}{CATEGORIES[i + 2]}", callback_data=f"category_{i + 2}"))
         keyboard.append(row)
     
     keyboard.append([InlineKeyboardButton("✅ Done Selecting", callback_data="categories_done")])
