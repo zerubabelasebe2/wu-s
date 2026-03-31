@@ -297,7 +297,7 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
     
     welcome_text = f"""
-🎓 *Welcome to ASTU Confession Bot\\!*
+🎓 *Welcome to WU Confession Bot\\!*
 
 Hi {escape_markdown_text(user.first_name or 'there')}\\! 
 
