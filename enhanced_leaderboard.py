@@ -467,7 +467,7 @@ def setup_sample_seasonal_competition():
     # Create a "Back to School" seasonal competition
     season_id = seasonal_manager.create_seasonal_competition(
         name="🎒 Back to School Challenge",
-        description="Welcome back, ASTU students! Share your experiences and earn rewards!",
+        description="Welcome back, WU students! Share your experiences and earn rewards!",
         theme="academic_year_start",
         duration_days=30,
         special_rewards={
