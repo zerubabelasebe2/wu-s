@@ -31,8 +31,11 @@ def sanitize_content(text):
     if not text:
         return None
     
-    # Remove excessive whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
+    # Remove excessive whitespace but preserve intentional newlines and spaces
+    # Replace multiple spaces/tabs with single space, but keep newlines
+    text = re.sub(r'[ \t]+', ' ', text).strip()
+    # Normalize multiple newlines to maximum of 2 (to avoid huge gaps)
+    text = re.sub(r'\n{3,}', '\n\n', text)
     
     # Check for meaningful content (language-agnostic)
     if not contains_meaningful_content(text):
@@ -64,13 +67,14 @@ def is_spam(text):
     return False
 
 def escape_markdown_text(text):
-    """Escape text for MarkdownV2"""
+    """Escape text for MarkdownV2 while preserving newlines and spaces"""
     if not text:
         return ""
     # Convert to string if it's not already a string
     text = str(text)
     # List of characters that need escaping in MarkdownV2
     # Note: order matters for some characters
+    # We do NOT escape newlines (\n) or spaces - they should be preserved
     escape_chars = ['\\', '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
     for char in escape_chars:
         text = text.replace(char, f'\\{char}')
