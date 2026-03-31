@@ -58,6 +58,14 @@ def ping():
     """Simple ping endpoint"""
     return "pong"
 
+@app.route("/ready", methods=["GET"])
+def ready():
+    """Readiness check for Render"""
+    if bot_status["running"]:
+        return jsonify({"status": "ready", "bot_running": True}), 200
+    else:
+        return jsonify({"status": "starting", "bot_running": False}), 503
+
 # ------------------- Database Setup -------------------
 def setup_database():
     """Run database migrations and setup"""
@@ -78,11 +86,12 @@ def run_bot():
     """Start bot.py as a non-blocking subprocess"""
     try:
         logger.info("🚀 Starting Telegram bot subprocess...")
-        bot_status["start_time"] = datetime.now(timezone.utc)
-        bot_status["running"] = True
-
+        
         # First, setup database
         setup_database()
+        
+        bot_status["start_time"] = datetime.now(timezone.utc)
+        bot_status["running"] = True
 
         # Start bot.py without blocking the main thread
         subprocess.Popen([sys.executable, "bot.py"])
@@ -94,13 +103,15 @@ def run_bot():
 
 # ------------------- Main -------------------
 if __name__ == "__main__":
-    # Start bot in a background daemon thread
-    bot_thread = threading.Thread(target=run_bot, daemon=True)
-    bot_thread.start()
-
-    # Start Flask server immediately so Render detects the open port
+    # Start Flask server FIRST to ensure port is open immediately
     port = int(os.environ.get("PORT", 5000))
     logger.info(f"🌐 Starting web server on 0.0.0.0:{port}")
+    
+    # Start bot in a background daemon thread AFTER Flask starts
+    bot_thread = threading.Thread(target=run_bot, daemon=True)
+    bot_thread.start()
+    
+    # Run Flask app (this keeps the port open)
     app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
 
 
