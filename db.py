@@ -189,61 +189,121 @@ def init_db():
             )''')
 
         # Ranking system tables
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_rankings (
-            user_id INTEGER PRIMARY KEY,
-            total_points INTEGER DEFAULT 0,
-            weekly_points INTEGER DEFAULT 0,
-            monthly_points INTEGER DEFAULT 0,
-            current_rank_id INTEGER DEFAULT 1,
-            rank_progress REAL DEFAULT 0.0,
-            total_achievements INTEGER DEFAULT 0,
-            highest_rank_achieved INTEGER DEFAULT 1,
-            consecutive_days INTEGER DEFAULT 0,
-            last_login_date TEXT,
-            last_activity TEXT DEFAULT CURRENT_TIMESTAMP,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(user_id)
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_rankings (
+                user_id BIGINT PRIMARY KEY,
+                total_points INTEGER DEFAULT 0,
+                weekly_points INTEGER DEFAULT 0,
+                monthly_points INTEGER DEFAULT 0,
+                current_rank_id INTEGER DEFAULT 1,
+                rank_progress REAL DEFAULT 0.0,
+                total_achievements INTEGER DEFAULT 0,
+                highest_rank_achieved INTEGER DEFAULT 1,
+                consecutive_days INTEGER DEFAULT 0,
+                last_login_date TEXT,
+                last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_rankings (
+                user_id INTEGER PRIMARY KEY,
+                total_points INTEGER DEFAULT 0,
+                weekly_points INTEGER DEFAULT 0,
+                monthly_points INTEGER DEFAULT 0,
+                current_rank_id INTEGER DEFAULT 1,
+                rank_progress REAL DEFAULT 0.0,
+                total_achievements INTEGER DEFAULT 0,
+                highest_rank_achieved INTEGER DEFAULT 1,
+                consecutive_days INTEGER DEFAULT 0,
+                last_login_date TEXT,
+                last_activity TEXT DEFAULT CURRENT_TIMESTAMP,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
         
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS point_transactions (
-            transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            points_change INTEGER NOT NULL,
-            transaction_type TEXT NOT NULL,
-            reference_id INTEGER,
-            reference_type TEXT,
-            description TEXT,
-            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(user_id)
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS point_transactions (
+                transaction_id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                points_change INTEGER NOT NULL,
+                transaction_type TEXT NOT NULL,
+                reference_id INTEGER,
+                reference_type TEXT,
+                description TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS point_transactions (
+                transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                points_change INTEGER NOT NULL,
+                transaction_type TEXT NOT NULL,
+                reference_id INTEGER,
+                reference_type TEXT,
+                description TEXT,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
         
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_achievements (
-            achievement_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            achievement_type TEXT NOT NULL,
-            achievement_name TEXT NOT NULL,
-            achievement_description TEXT,
-            points_awarded INTEGER DEFAULT 0,
-            is_special INTEGER DEFAULT 0,
-            metadata TEXT,
-            achieved_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(user_id)
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_achievements (
+                achievement_id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                achievement_type TEXT NOT NULL,
+                achievement_name TEXT NOT NULL,
+                achievement_description TEXT,
+                points_awarded INTEGER DEFAULT 0,
+                is_special INTEGER DEFAULT 0,
+                metadata TEXT,
+                achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_achievements (
+                achievement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                achievement_type TEXT NOT NULL,
+                achievement_name TEXT NOT NULL,
+                achievement_description TEXT,
+                points_awarded INTEGER DEFAULT 0,
+                is_special INTEGER DEFAULT 0,
+                metadata TEXT,
+                achieved_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
         
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS rank_definitions (
-            rank_id INTEGER PRIMARY KEY,
-            rank_name TEXT NOT NULL,
-            rank_emoji TEXT NOT NULL,
-            min_points INTEGER NOT NULL,
-            max_points INTEGER,
-            special_perks TEXT,
-            is_special INTEGER DEFAULT 0
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS rank_definitions (
+                rank_id INTEGER PRIMARY KEY,
+                rank_name TEXT NOT NULL,
+                rank_emoji TEXT NOT NULL,
+                min_points INTEGER NOT NULL,
+                max_points INTEGER,
+                special_perks TEXT,
+                is_special INTEGER DEFAULT 0
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS rank_definitions (
+                rank_id INTEGER PRIMARY KEY,
+                rank_name TEXT NOT NULL,
+                rank_emoji TEXT NOT NULL,
+                min_points INTEGER NOT NULL,
+                max_points INTEGER,
+                special_perks TEXT,
+                is_special INTEGER DEFAULT 0
+            )''')
         
         # Check if rank_definitions table has the correct columns before inserting
         try:
@@ -270,181 +330,385 @@ def init_db():
                 raise e
         
         # Analytics tables
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS user_activity_log (
-            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            activity_type TEXT NOT NULL,
-            details TEXT,
-            timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(user_id)
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_activity_log (
+                log_id SERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                activity_type TEXT NOT NULL,
+                details TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_activity_log (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                activity_type TEXT NOT NULL,
+                details TEXT,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )''')
         
-        cursor.execute('''
-        CREATE TABLE IF NOT EXISTS daily_stats (
-            stat_date TEXT PRIMARY KEY,
-            new_users INTEGER DEFAULT 0,
-            total_confessions INTEGER DEFAULT 0,
-            approved_confessions INTEGER DEFAULT 0,
-            rejected_confessions INTEGER DEFAULT 0,
-            total_comments INTEGER DEFAULT 0,
-            active_users INTEGER DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )''')
+        if use_pg:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS daily_stats (
+                stat_date TEXT PRIMARY KEY,
+                new_users INTEGER DEFAULT 0,
+                total_confessions INTEGER DEFAULT 0,
+                approved_confessions INTEGER DEFAULT 0,
+                rejected_confessions INTEGER DEFAULT 0,
+                total_comments INTEGER DEFAULT 0,
+                active_users INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )''')
+        else:
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS daily_stats (
+                stat_date TEXT PRIMARY KEY,
+                new_users INTEGER DEFAULT 0,
+                total_confessions INTEGER DEFAULT 0,
+                approved_confessions INTEGER DEFAULT 0,
+                rejected_confessions INTEGER DEFAULT 0,
+                total_comments INTEGER DEFAULT 0,
+                active_users INTEGER DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )''')
         
         # Add missing columns to posts table for analytics
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN status TEXT DEFAULT "pending"')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN sentiment_score REAL DEFAULT 0.0')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN profanity_detected INTEGER DEFAULT 0')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN spam_score REAL DEFAULT 0.0')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        # Media support columns
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_type TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_file_id TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_file_unique_id TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_caption TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_file_size INTEGER')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_mime_type TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_duration INTEGER')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_width INTEGER')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_height INTEGER')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        
-        try:
-            cursor.execute('ALTER TABLE posts ADD COLUMN media_thumbnail_file_id TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
+        if use_pg:
+            # PostgreSQL version - check if column exists before adding
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'status'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN status TEXT DEFAULT \'pending\'')
+            except Exception:
+                pass  # Column already exists or other issue
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'sentiment_score'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN sentiment_score REAL DEFAULT 0.0')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'profanity_detected'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN profanity_detected INTEGER DEFAULT 0')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'spam_score'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN spam_score REAL DEFAULT 0.0')
+            except Exception:
+                pass
+            
+            # Media support columns
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_type'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_type TEXT')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_file_id'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_file_id TEXT')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_file_unique_id'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_file_unique_id TEXT')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_caption'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_caption TEXT')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_file_size'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_file_size INTEGER')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_mime_type'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_mime_type TEXT')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_duration'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_duration INTEGER')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_width'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_width INTEGER')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_height'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_height INTEGER')
+            except Exception:
+                pass
+            
+            try:
+                cursor.execute("SELECT 1 FROM information_schema.columns WHERE table_name = 'posts' AND column_name = 'media_thumbnail_file_id'")
+                if not cursor.fetchone():
+                    cursor.execute('ALTER TABLE posts ADD COLUMN media_thumbnail_file_id TEXT')
+            except Exception:
+                pass
+        else:
+            # SQLite version (original code)
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN status TEXT DEFAULT "pending"')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN sentiment_score REAL DEFAULT 0.0')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN profanity_detected INTEGER DEFAULT 0')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN spam_score REAL DEFAULT 0.0')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            # Media support columns
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_type TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_file_id TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_file_unique_id TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_caption TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_file_size INTEGER')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_mime_type TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_duration INTEGER')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_width INTEGER')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_height INTEGER')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
+            
+            try:
+                cursor.execute('ALTER TABLE posts ADD COLUMN media_thumbnail_file_id TEXT')
+            except sqlite3.OperationalError:
+                pass  # Column already exists
         
         # Update existing posts to have proper status
-        cursor.execute('''
-            UPDATE posts 
-            SET status = CASE 
-                WHEN approved = 1 THEN 'approved'
-                WHEN approved = 0 THEN 'rejected'
-                ELSE 'pending'
-            END 
-            WHERE status IS NULL OR status = 'pending'
-        ''')
+        if use_pg:
+            cursor.execute('''
+                UPDATE posts 
+                SET status = CASE 
+                    WHEN approved = 1 THEN 'approved'
+                    WHEN approved = 0 THEN 'rejected'
+                    ELSE 'pending'
+                END 
+                WHERE status IS NULL OR status = 'pending'
+            ''')
+        else:
+            cursor.execute('''
+                UPDATE posts 
+                SET status = CASE 
+                    WHEN approved = 1 THEN 'approved'
+                    WHEN approved = 0 THEN 'rejected'
+                    ELSE 'pending'
+                END 
+                WHERE status IS NULL OR status = 'pending'
+            ''')
         
         conn.commit()
 
 def add_user(user_id, username=None, first_name=None, last_name=None):
     """Add or update user information"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('''
-            INSERT OR REPLACE INTO users (user_id, username, first_name, last_name, join_date, questions_asked, comments_posted, blocked)
-            VALUES (?, ?, ?, ?, 
-                COALESCE((SELECT join_date FROM users WHERE user_id = ? AND join_date IS NOT NULL), CURRENT_TIMESTAMP),
-                COALESCE((SELECT questions_asked FROM users WHERE user_id = ?), 0),
-                COALESCE((SELECT comments_posted FROM users WHERE user_id = ?), 0),
-                COALESCE((SELECT blocked FROM users WHERE user_id = ?), 0)
-            )
-        ''', (user_id, username, first_name, last_name, user_id, user_id, user_id, user_id))
+        if use_pg:
+            cursor.execute('''
+                INSERT INTO users (user_id, username, first_name, last_name, join_date, questions_asked, comments_posted, blocked)
+                VALUES (%s, %s, %s, %s, 
+                    COALESCE((SELECT join_date FROM users WHERE user_id = %s AND join_date IS NOT NULL), CURRENT_TIMESTAMP),
+                    COALESCE((SELECT questions_asked FROM users WHERE user_id = %s), 0),
+                    COALESCE((SELECT comments_posted FROM users WHERE user_id = %s), 0),
+                    COALESCE((SELECT blocked FROM users WHERE user_id = %s), 0)
+                )
+                ON CONFLICT (user_id) DO UPDATE SET
+                username = EXCLUDED.username,
+                first_name = EXCLUDED.first_name,
+                last_name = EXCLUDED.last_name
+            ''', (user_id, username, first_name, last_name, user_id, user_id, user_id, user_id))
+        else:
+            cursor.execute('''
+                INSERT OR REPLACE INTO users (user_id, username, first_name, last_name, join_date, questions_asked, comments_posted, blocked)
+                VALUES (?, ?, ?, ?, 
+                    COALESCE((SELECT join_date FROM users WHERE user_id = ? AND join_date IS NOT NULL), CURRENT_TIMESTAMP),
+                    COALESCE((SELECT questions_asked FROM users WHERE user_id = ?), 0),
+                    COALESCE((SELECT comments_posted FROM users WHERE user_id = ?), 0),
+                    COALESCE((SELECT blocked FROM users WHERE user_id = ?), 0)
+                )
+            ''', (user_id, username, first_name, last_name, user_id, user_id, user_id, user_id))
         conn.commit()
 
 def get_user_info(user_id):
     """Get complete user information"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT user_id, username, first_name, last_name, join_date, 
-                   questions_asked, comments_posted, blocked
-            FROM users WHERE user_id = ?
-        ''', (user_id,))
+        if use_pg:
+            cursor.execute('''
+                SELECT user_id, username, first_name, last_name, join_date, 
+                       questions_asked, comments_posted, blocked
+                FROM users WHERE user_id = %s
+            ''', (user_id,))
+        else:
+            cursor.execute('''
+                SELECT user_id, username, first_name, last_name, join_date, 
+                       questions_asked, comments_posted, blocked
+                FROM users WHERE user_id = ?
+            ''', (user_id,))
         return cursor.fetchone()
 
 def get_comment_count(post_id):
     """Get total comment count for a post (including replies)"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM comments WHERE post_id = ?', (post_id,))
+        if use_pg:
+            cursor.execute('SELECT COUNT(*) FROM comments WHERE post_id = %s', (post_id,))
+        else:
+            cursor.execute('SELECT COUNT(*) FROM comments WHERE post_id = ?', (post_id,))
         result = cursor.fetchone()
         return result[0] if result else 0
 
 def is_blocked_user(user_id):
     """Check if user is blocked"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT blocked FROM users WHERE user_id = ?', (user_id,))
+        if use_pg:
+            cursor.execute('SELECT blocked FROM users WHERE user_id = %s', (user_id,))
+        else:
+            cursor.execute('SELECT blocked FROM users WHERE user_id = ?', (user_id,))
         result = cursor.fetchone()
         return result and result[0] == 1
 
 def get_user_posts(user_id, limit=10):
     """Get user's posts with status, comment count, and media information"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('''
-            SELECT p.post_id, p.content, p.category, p.timestamp, p.approved,
-                   COUNT(c.comment_id) as comment_count, p.post_number,
-                   p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
-                   p.media_file_size, p.media_mime_type, p.media_duration, 
-                   p.media_width, p.media_height, p.media_thumbnail_file_id
-            FROM posts p
-            LEFT JOIN comments c ON p.post_id = c.post_id
-            WHERE p.user_id = ?
-            GROUP BY p.post_id, p.content, p.category, p.timestamp, p.approved, p.post_number,
-                     p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
-                     p.media_file_size, p.media_mime_type, p.media_duration, 
-                     p.media_width, p.media_height, p.media_thumbnail_file_id
-            ORDER BY p.timestamp DESC
-            LIMIT ?
-        ''', (user_id, limit))
+        if use_pg:
+            cursor.execute('''
+                SELECT p.post_id, p.content, p.category, p.timestamp, p.approved,
+                       COUNT(c.comment_id) as comment_count, p.post_number,
+                       p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
+                       p.media_file_size, p.media_mime_type, p.media_duration, 
+                       p.media_width, p.media_height, p.media_thumbnail_file_id
+                FROM posts p
+                LEFT JOIN comments c ON p.post_id = c.post_id
+                WHERE p.user_id = %s
+                GROUP BY p.post_id, p.content, p.category, p.timestamp, p.approved, p.post_number,
+                         p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
+                         p.media_file_size, p.media_mime_type, p.media_duration, 
+                         p.media_width, p.media_height, p.media_thumbnail_file_id
+                ORDER BY p.timestamp DESC
+                LIMIT %s
+            ''', (user_id, limit))
+        else:
+            cursor.execute('''
+                SELECT p.post_id, p.content, p.category, p.timestamp, p.approved,
+                       COUNT(c.comment_id) as comment_count, p.post_number,
+                       p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
+                       p.media_file_size, p.media_mime_type, p.media_duration, 
+                       p.media_width, p.media_height, p.media_thumbnail_file_id
+                FROM posts p
+                LEFT JOIN comments c ON p.post_id = c.post_id
+                WHERE p.user_id = ?
+                GROUP BY p.post_id, p.content, p.category, p.timestamp, p.approved, p.post_number,
+                         p.media_type, p.media_file_id, p.media_file_unique_id, p.media_caption,
+                         p.media_file_size, p.media_mime_type, p.media_duration, 
+                         p.media_width, p.media_height, p.media_thumbnail_file_id
+                ORDER BY p.timestamp DESC
+                LIMIT ?
+            ''', (user_id, limit))
         return cursor.fetchall()
         
 def get_post_author_id(post_id):
     """Get the user_id of the post author"""
-    with sqlite3.connect(DB_PATH) as conn:
+    db_conn = get_db_connection()
+    use_pg = getattr(db_conn, "use_postgresql", False)
+    
+    with db_conn.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT user_id FROM posts WHERE post_id = ?', (post_id,))
+        if use_pg:
+            cursor.execute('SELECT user_id FROM posts WHERE post_id = %s', (post_id,))
+        else:
+            cursor.execute('SELECT user_id FROM posts WHERE post_id = ?', (post_id,))
         result = cursor.fetchone()
         return result[0] if result else None
